@@ -46,25 +46,29 @@ def list_subjects(message):
     markup.add('الرجوع إلى البداية')
     bot.send_message(message.chat.id, "اختر المادة لتحميل الملف:", reply_markup=markup)
 
+# --- الدالة النهائية لإرسال ملف واحد أو عدة ملفات للمادة الواحدة ---
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
     subject_name = message.text
     found = False
 
+    # التأكد من وجود المجلد
     if not os.path.exists(FILES_FOLDER):
         os.makedirs(FILES_FOLDER)
 
+    # البحث في المجلد عن كل ملف يبدأ باسم المادة (الزر)
     for file in os.listdir(FILES_FOLDER):
-        file_name_without_ext = os.path.splitext(file)[0]
-        
-        if file_name_without_ext == subject_name:
+        # ميزة startswith تسمح بإيجاد ملفات مثل: "قواعد البيانات 1" و "قواعد البيانات 2"
+        if file.startswith(subject_name):
             file_path = os.path.join(FILES_FOLDER, file)
             with open(file_path, 'rb') as doc:
-                bot.send_document(message.chat.id, doc, caption=f"إليك ملف مادة: {subject_name}")
+                bot.send_document(message.chat.id, doc, caption=f"📄 إليك ملف مادة: {subject_name}")
             found = True
-            break
+            # لاحظ: لم نضع break هنا لكي يرسل البوت جميع الملفات المرتبطة بالمادة
     
     if not found and subject_name not in ['الترم الاول', 'الترم الثاني', 'الرجوع إلى البداية']:
         bot.reply_to(message, "سيتم رفع ملفات هذه المادة قريباً.. ⏳")
 
+# تشغيل البوت بشكل مستمر
 bot.infinity_polling()
+
