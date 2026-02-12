@@ -2,10 +2,11 @@ import telebot
 from telebot import types
 import os
 
+# التوكن الخاص بك
 TOKEN = '8410868580:AAGnJDepOVMVcRCYXnQ4nHshT2Q_bQUYPdY'
 bot = telebot.TeleBot(TOKEN)
 
-# مجلد الملفات (يجب أن يكون بنفس الاسم في مستودع GitHub)
+# اسم مجلد الملفات في GitHub
 FILES_FOLDER = 'my_files/'
 
 user_status = {}
@@ -18,7 +19,7 @@ def main_menu(message):
     markup.row(types.KeyboardButton('المستوى الثاني 2️⃣'), types.KeyboardButton('المستوى الاول 1️⃣'))
     markup.row(types.KeyboardButton('المستوى الرابع 4️⃣'), types.KeyboardButton('المستوى الثالث 3️⃣'))
     markup.add('📖 معلومات عامة عن الأمن السيبراني', 'قنوات تعليمية للمقررات')
-    bot.send_message(message.chat.id, "مرحباً بك.. اختر المستوى:", reply_markup=markup)
+    bot.send_message(message.chat.id, "مرحباً بك في بوت المقررات.. اختر المستوى:", reply_markup=markup)
 
 @bot.message_handler(func=lambda message: message.text in ['المستوى الاول 1️⃣', 'المستوى الثاني 2️⃣'])
 def choose_term(message):
@@ -44,31 +45,29 @@ def list_subjects(message):
         markup.add('تراسل البيانات و الشبكات', 'البرمجة الموجهة بالكائنات', 'معمارية وتنظيم الحاسب', 'اساسيات تصميم الويب', 'علم التشفير', 'القانون والخصوصية')
 
     markup.add('الرجوع إلى البداية')
-    bot.send_message(message.chat.id, "اختر المادة لتحميل الملف:", reply_markup=markup)
+    bot.send_message(message.chat.id, "اختر المادة لتحميل الملفات المرتبطة بها:", reply_markup=markup)
 
-# --- الدالة النهائية لإرسال ملف واحد أو عدة ملفات للمادة الواحدة ---
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
     subject_name = message.text
     found = False
 
-    # التأكد من وجود المجلد
     if not os.path.exists(FILES_FOLDER):
         os.makedirs(FILES_FOLDER)
 
-    # البحث في المجلد عن كل ملف يبدأ باسم المادة (الزر)
+    # البحث عن كل الملفات التي تبدأ باسم المادة
     for file in os.listdir(FILES_FOLDER):
-        # ميزة startswith تسمح بإيجاد ملفات مثل: "قواعد البيانات 1" و "قواعد البيانات 2"
         if file.startswith(subject_name):
             file_path = os.path.join(FILES_FOLDER, file)
-            with open(file_path, 'rb') as doc:
-                bot.send_document(message.chat.id, doc, caption=f"📄 إليك ملف مادة: {subject_name}")
-            found = True
-            # لاحظ: لم نضع break هنا لكي يرسل البوت جميع الملفات المرتبطة بالمادة
+            try:
+                with open(file_path, 'rb') as doc:
+                    bot.send_document(message.chat.id, doc, caption=f"📄 ملف مادة: {subject_name}")
+                found = True
+            except Exception as e:
+                print(f"خطأ في إرسال الملف {file}: {e}")
     
     if not found and subject_name not in ['الترم الاول', 'الترم الثاني', 'الرجوع إلى البداية']:
         bot.reply_to(message, "سيتم رفع ملفات هذه المادة قريباً.. ⏳")
 
-# تشغيل البوت بشكل مستمر
+# تشغيل البوت بشكل مستمر ومستقر على Render
 bot.infinity_polling()
-
