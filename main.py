@@ -71,4 +71,5 @@ def handle_all_messages(message):
     if not found and subject_name not in ['الترم الاول', 'الترم الثاني', 'الرجوع إلى البداية']:
         bot.reply_to(message, "سيتم رفع ملفات هذه المادة قريباً.. ⏳")
 
-bot.polling()
+bot.infinity_polling()
+
