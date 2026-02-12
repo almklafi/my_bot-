@@ -1,11 +1,11 @@
 import telebot
 from telebot import types
-import os  # مكتبة للتعامل مع ملفات النظام
+import os
 
 TOKEN = '8410868580:AAGnJDepOVMVcRCYXnQ4nHshT2Q_bQUYPdY'
 bot = telebot.TeleBot(TOKEN)
 
-# مجلد الملفات (تأكد من إنشاء مجلد بهذا الاسم في PythonAnywhere ورفع ملفاتك داخله)
+# مجلد الملفات (يجب أن يكون بنفس الاسم في مستودع GitHub)
 FILES_FOLDER = 'my_files/'
 
 user_status = {}
@@ -46,19 +46,15 @@ def list_subjects(message):
     markup.add('الرجوع إلى البداية')
     bot.send_message(message.chat.id, "اختر المادة لتحميل الملف:", reply_markup=markup)
 
-# --- الدالة الذكية لإرسال أي ملف بأي امتداد ---
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
     subject_name = message.text
     found = False
 
-    # التأكد من وجود المجلد
     if not os.path.exists(FILES_FOLDER):
         os.makedirs(FILES_FOLDER)
 
-    # البحث عن أي ملف يبدأ باسم المادة داخل المجلد
     for file in os.listdir(FILES_FOLDER):
-        # سنقوم بمطابقة اسم الملف مع اسم الزر (بدون الامتداد)
         file_name_without_ext = os.path.splitext(file)[0]
         
         if file_name_without_ext == subject_name:
@@ -72,4 +68,3 @@ def handle_all_messages(message):
         bot.reply_to(message, "سيتم رفع ملفات هذه المادة قريباً.. ⏳")
 
 bot.infinity_polling()
-
